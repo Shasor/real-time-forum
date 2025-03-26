@@ -1,39 +1,110 @@
+@import url(./var.css);
+@import url(./signup.css);
+
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-}
-
-body {
   width: 100vw;
   height: 100vh;
+  background-color: var(--primary);
 }
 
-.container {
-  width: 100%;
-  height: 100%;
-}
-
-.signup {
+header {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  height: 10%;
+  width: 100%;
+}
+
+header h2 {
+  padding: 10px;
+  border: 2px solid var(--third);
+  border-radius: clamp(8px, 1.5vw, 20px);
+  background-color: transparent;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100%;
+  height: 90%;
+  padding: 0px 100px;
 }
 
-.signup form {
+#categories {
+  display: inline-flex;
+  width: 100%;
+  justify-content: space-evenly;
+}
+
+.category {
+  width: 150px;
+  margin: 10px;
+  padding: 5px 10px;
+  border: 2px solid var(--third);
+  border-radius: 2em;
+  text-align: center;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+#posts {
+  width: 100%;
+  height: calc(100% - 50px - 2em);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 20px;
+  overflow-y: auto;
+  padding: 20px 0;
+}
+
+.post {
+  height: 200px; /* Ajustez cette valeur selon vos besoins */
+  border: 2px solid var(--third);
+  border-radius: 10px;
   padding: 10px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
 }
 
-.signup form label {
-  margin: 5px;
+.post .content {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
-.signup form input,
-.signup form select {
+#navbar {
+  width: 50%;
+  height: 2em;
+  border: 2px solid var(--third);
   border-radius: 2em;
-  padding: 2.5px;
+  margin: 20px 0px;
+}
+
+#blur {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(3px);
+  z-index: 1;
 }
