@@ -5,10 +5,6 @@ export async function createPost(data) {
     // TODO: handle no valid option (client injection)
     return;
   }
-  data.user = {
-    uuid: data.user.uuid,
-    isConnected: data.user.isConnected,
-  };
   const res = await fetch('/api/create-post', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
