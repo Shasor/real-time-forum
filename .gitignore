@@ -27,3 +27,5 @@ go.work.sum
 # Perso
 tmp/
 internal/db/database.db
+node_modules/
+static/css/output.css

@@ -16,7 +16,7 @@ func GetDB() *sql.DB {
 	// SQL statement to create the users table
 	tables := `CREATE TABLE IF NOT EXISTS users (
 			uuid TEXT PRIMARY KEY,
-			nickname TEXT UNIQUE,
+			nickname TEXT UNIQUE NOT NULL,
 			age TEXT NOT NULL,
 			gender TEXT NOT NULL,
 			firstName TEXT NOT NULL,
@@ -26,8 +26,34 @@ func GetDB() *sql.DB {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		); CREATE TABLE IF NOT EXISTS sessions (
 			uuid TEXT PRIMARY KEY,
-			user TEXT UNIQUE,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			user TEXT UNIQUE NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(user) REFERENCES users(uuid)
+		); CREATE TABLE IF NOT EXISTS posts (
+			uuid TEXT PRIMARY KEY,
+			user TEXT NOT NULL,
+			parent TEXT,
+			content TEXT NOT NULL,
+			category TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(user) REFERENCES users(uuid),
+			FOREIGN KEY(parent) REFERENCES posts(uuid)
+		); CREATE TABLE IF NOT EXISTS messages (
+			uuid TEXT PRIMARY KEY,
+			"from" TEXT NOT NULL,
+			"to" TEXT NOT NULL,
+			content TEXT,
+			time INTEGER NOT NULL,
+			FOREIGN KEY("from") REFERENCES users(uuid),
+			FOREIGN KEY("to") REFERENCES users(uuid)
+		); CREATE TABLE IF NOT EXISTS conversations (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user1 TEXT NOT NULL,
+			user2 TEXT NOT NULL,
+			last_message TEXT NOT NULL,
+			FOREIGN KEY(user1) REFERENCES users(uuid),
+			FOREIGN KEY(user2) REFERENCES users(uuid),
+			FOREIGN KEY(last_message) REFERENCES messages(uuid)
 		)`
 
 	// Start a transaction

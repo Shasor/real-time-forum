@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+@layer base {
+  html {
+    @apply h-full;
+  }
+  body {
+    @apply antialiased h-full bg-[url(../assets/background.webp)] bg-cover;
+  }
+}
+
+.selected {
+  @apply bg-gray-200;
+}

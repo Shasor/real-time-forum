@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"real-time-forum/internal/models"
 
@@ -41,7 +42,7 @@ func CreateUser(uuid, nickname, age, gender, firstName, lastName, email, passwor
 	return http.StatusOK, nil
 }
 
-func SelectUserByUUID(uuid int) (*models.User, error) {
+func SelectUserByUUID(uuid string) (*models.User, error) {
 	db := GetDB()
 	defer db.Close()
 
@@ -131,4 +132,35 @@ func SelectUserBySessionUUID(session_uuid string) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func GetUsers() ([]models.User, error) {
+	db := GetDB()
+	defer db.Close()
+
+	query := `
+	SELECT u.uuid, u.nickname, u.age, u.gender, u.firstName, u.lastName, u.email
+	FROM users u;`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Printf("Error executing query: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.UUID, &user.Nickname, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email)
+		if err != nil {
+			log.Printf("Error scanning row: %v", err)
+			continue
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		log.Printf("Error during row iteration: %v", err)
+	}
+	return users, nil
 }

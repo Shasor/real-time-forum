@@ -7,7 +7,7 @@ import (
 	"real-time-forum/internal/models"
 	"real-time-forum/internal/utils"
 
-	"github.com/gofrs/uuid"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -45,16 +45,10 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionUUID, err := uuid.NewV7()
-	if err != nil {
-		resp.Code = http.StatusInternalServerError
-		resp.Msg = err.Error()
-		utils.SendResponse(w, resp)
-		return
-	}
+	sessionUUID := uuid.New().String()
 
 	db.ClearSession(user.UUID)
-	code, err := db.CreateSession(sessionUUID.String(), user.UUID)
+	code, err := db.CreateSession(sessionUUID, user.UUID)
 	if err != nil {
 		resp.Code = code
 		resp.Msg = err.Error()
@@ -63,7 +57,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Msg = "User Logged In!"
-	resp.Data = map[string]string{"session_uuid": sessionUUID.String()}
+	resp.Data = map[string]string{"session_uuid": sessionUUID}
 
 	utils.SendResponse(w, resp)
 }
