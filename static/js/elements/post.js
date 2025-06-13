@@ -5,6 +5,15 @@ export class PostElement extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    this.addEventListener('click', () => {
+      const existingModal = document.querySelector('c-modal');
+      if (existingModal) existingModal.remove();
+      const modal = document.createElement('c-modal');
+      const comments = document.createElement('c-comments');
+      comments.setAttribute('post-uuid', this.UUID);
+      modal.appendChild(comments);
+      document.querySelector('main').appendChild(modal);
+    });
   }
 
   render() {

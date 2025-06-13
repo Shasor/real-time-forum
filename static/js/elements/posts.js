@@ -24,6 +24,7 @@ export class PostsElement extends HTMLElement {
     for (let post of state.posts) {
       const box = document.createElement('c-post');
       box.Content = post.content;
+      box.UUID = post.uuid;
       section.appendChild(box);
     }
     this.appendChild(section);

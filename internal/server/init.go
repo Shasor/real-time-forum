@@ -28,7 +28,9 @@ func InitServer() {
 	server.Handle("/api/signin", api.SignIn)
 	server.Handle("/api/session", api.Session)
 	server.Handle("/api/create-post", api.CreatePost)
+	server.Handle("/api/create-comment", api.CreateComment)
 	server.Handle("/api/posts", api.Posts)
+	server.Handle("/api/comments", api.Comments)
 	server.Handle("/api/users", api.Users)
 	server.Handle("/ws", ws.WebSocketHandler(hub))
 

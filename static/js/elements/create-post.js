@@ -14,7 +14,10 @@ export class CreatePostElement extends HTMLElement {
       const data = {
         content: this.querySelector('textarea').value,
         category: this.querySelector('select').value,
-        user: state.user,
+        user: {
+          uuid: state.user.uuid,
+          isConnected: state.user.isConnected,
+        },
       };
       createPost(data);
     });
