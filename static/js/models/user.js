@@ -1,3 +1,5 @@
+import { state } from '../main.js';
+
 export class User {
   constructor(session_uuid) {
     this.uuid = null;
@@ -10,6 +12,7 @@ export class User {
     this.email = null;
     this.isConnected = false;
     this.socket = null;
+    this.messageHandlers = {};
     if (session_uuid != null) this.getSession();
   }
 
@@ -55,6 +58,21 @@ export class User {
     socket.onclose = () => {
       this.socket = null;
       console.log('Websocket closed!');
+    };
+
+    socket.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      const handler = this.messageHandlers[msg.type];
+      if (handler) {
+        handler(msg);
+      } else {
+        console.warn('Aucun handler pour le type :', msg.type);
+      }
+    };
+
+    this.messageHandlers['user_list'] = (msg) => {
+      const users = JSON.parse(msg.content);
+      state.connectedUsers = users;
     };
   }
 

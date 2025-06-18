@@ -20,7 +20,7 @@ func InitServer() {
 	// Create the HTTP server
 	server := NewServer(":8080", 10*time.Second, 10*time.Second, 30*time.Second, 10*time.Second, 1<<20)
 
-	// static
+	// static middleware
 	server.Handle("/", middlewares.StaticMiddleware(http.FileServer(http.Dir("static"))))
 
 	// all api handlers
@@ -31,7 +31,6 @@ func InitServer() {
 	server.Handle("/api/create-comment", api.CreateComment)
 	server.Handle("/api/posts", api.Posts)
 	server.Handle("/api/comments", api.Comments)
-	server.Handle("/api/users", api.Users)
 	server.Handle("/ws", ws.WebSocketHandler(hub))
 
 	// middlewares

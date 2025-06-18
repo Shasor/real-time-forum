@@ -1,23 +1,22 @@
 import { state } from '../../main.js';
-import { getAllUsers } from '../../services/user.js';
 
 export class ChatElement extends HTMLElement {
   constructor() {
     super();
+    this.usersList = null;
     this.selectedUserLi = null;
     this.convDiv = null;
   }
 
   connectedCallback() {
-    this.loadUsers();
+    state.user.socket.addEventListener('message', (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'user_list') this.renderUsersList();
+    });
+    this.render();
   }
 
-  async loadUsers() {
-    const users = await getAllUsers();
-    this.render(users);
-  }
-
-  render(users) {
+  render() {
     this.className = `
     flex w-full max-w-4xl h-[80vh] md:h-[60vh]
     rounded-2xl overflow-hidden bg-white shadow-xl
@@ -33,17 +32,24 @@ export class ChatElement extends HTMLElement {
     usersListH2.textContent = 'Users';
     usersListDiv.appendChild(usersListH2);
 
-    const usersList = document.createElement('ul');
-    usersList.className = 'space-y-3';
-    usersListDiv.appendChild(usersList);
+    this.usersList = document.createElement('ul');
+    this.usersList.className = 'space-y-3';
+    usersListDiv.appendChild(this.usersList);
 
-    if (!users) {
-      usersList.innerHTML = '<p class="text-red-500">Erreur de chargement des utilisateurs.</p>';
+    this.renderUsersList();
+  }
+
+  renderUsersList() {
+    const selectedUUID = this.selectedUserLi?.dataset.uuid;
+    this.usersList.innerHTML = '';
+
+    if (state.connectedUsers.length === 0) {
+      this.usersList.innerHTML = '<p class="text-red-500">Aucun utilisateur connecté !</p>';
       return;
     }
 
     // Liste des utilisateurs
-    for (let user of users) {
+    for (let user of state.connectedUsers) {
       if (user.nickname === state.user.nickname) continue;
 
       const userLi = document.createElement('li');
@@ -54,7 +60,12 @@ export class ChatElement extends HTMLElement {
       userLi.textContent = user.nickname;
       userLi.title = user.nickname;
       userLi.dataset.uuid = user.uuid;
-      usersList.appendChild(userLi);
+      this.usersList.appendChild(userLi);
+
+      if (user.uuid === selectedUUID) {
+        userLi.classList.add('selected');
+        this.selectedUserLi = userLi;
+      }
 
       userLi.addEventListener('click', (e) => {
         // Nettoyage
@@ -77,9 +88,8 @@ export class ChatElement extends HTMLElement {
         input.placeholder = `Write to ${this.selectedUserLi.textContent}...`;
         this.convDiv.appendChild(input);
 
-        state.user.socket.onmessage = (e) => {
-          const msg = JSON.parse(e.data);
-          if (msg.from !== this.selectedUserLi.dataset.uuid) return;
+        state.user.messageHandlers['msg'] = (msg) => {
+          if (msg.type !== 'msg' || msg.from !== this.selectedUserLi.dataset.uuid) return;
 
           const msgElement = document.createElement('c-msg');
           msgElement.content = msg.content;
@@ -97,6 +107,7 @@ export class ChatElement extends HTMLElement {
             const msgElement = document.createElement('c-msg');
             msgElement.content = content;
             msgsDiv.appendChild(msgElement);
+            if (this.selectedUserLi !== this.selectedUserLi.parentElement.firstElementChild) this.renderUsersList();
           }
         });
       });
