@@ -31,6 +31,7 @@ func InitServer() {
 	server.Handle("/api/create-comment", api.CreateComment)
 	server.Handle("/api/posts", api.Posts)
 	server.Handle("/api/comments", api.Comments)
+	server.Handle("/api/chat", api.Chat)
 	server.Handle("/ws", ws.WebSocketHandler(hub))
 
 	// middlewares

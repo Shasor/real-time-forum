@@ -135,3 +135,34 @@ func UpdateLastMessageTime(user1, user2 string, timestamp int64) error {
 	_, err := db.Exec(query, timestamp, user1, user2, user2, user1)
 	return err
 }
+
+func GetMessages(from, to string, offset, limit int) ([]models.Message, error) {
+	db := GetDB()
+	defer db.Close()
+
+	query := `
+  		SELECT uuid, "from", "to", content, time
+  		FROM messages
+  		WHERE ("from" = ? AND "to" = ?) OR ("from" = ? AND "to" = ?)
+  		ORDER BY time DESC
+  		LIMIT ? OFFSET ?
+	`
+
+	rows, err := db.Query(query, from, to, to, from, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	messages := []models.Message{}
+	for rows.Next() {
+		var m models.Message
+		err := rows.Scan(&m.UUID, &m.From, &m.To, &m.Content, &m.Time)
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, m)
+	}
+	return messages, nil
+}

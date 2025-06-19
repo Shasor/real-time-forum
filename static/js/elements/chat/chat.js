@@ -1,4 +1,5 @@
 import { state } from '../../main.js';
+import { fetchMessages } from '../../services/chat.js';
 
 export class ChatElement extends HTMLElement {
   constructor() {
@@ -80,7 +81,7 @@ export class ChatElement extends HTMLElement {
         this.appendChild(this.convDiv);
 
         const msgsDiv = document.createElement('div');
-        msgsDiv.className = 'flex flex-col flex-1 justify-end p-4 overflow-y-auto space-y-2';
+        msgsDiv.className = `flex flex-col flex-1 p-4 overflow-y-auto space-y-2`;
         this.convDiv.appendChild(msgsDiv);
 
         const input = document.createElement('input');
@@ -88,13 +89,14 @@ export class ChatElement extends HTMLElement {
         input.placeholder = `Write to ${this.selectedUserLi.textContent}...`;
         this.convDiv.appendChild(input);
 
+        // add previous msgs
+        this.addPrevMsgs(msgsDiv, this.selectedUserLi.dataset.uuid);
+
         state.user.messageHandlers['msg'] = (msg) => {
           if (msg.type !== 'msg' || msg.from !== this.selectedUserLi.dataset.uuid) return;
 
-          const msgElement = document.createElement('c-msg');
-          msgElement.content = msg.content;
-          msgElement.isSender = false;
-          msgsDiv.appendChild(msgElement);
+          msgsDiv.appendChild(this.createMsg(msg.content, false));
+          msgsDiv.scrollTop = msgsDiv.scrollHeight;
         };
 
         input.addEventListener('keydown', (e) => {
@@ -104,13 +106,100 @@ export class ChatElement extends HTMLElement {
             state.user.sendMessage(targetUUID, content);
             input.value = '';
 
-            const msgElement = document.createElement('c-msg');
-            msgElement.content = content;
-            msgsDiv.appendChild(msgElement);
+            msgsDiv.appendChild(this.createMsg(content));
+            msgsDiv.scrollTop = msgsDiv.scrollHeight;
             if (this.selectedUserLi !== this.selectedUserLi.parentElement.firstElementChild) this.renderUsersList();
           }
         });
       });
     }
+  }
+
+  createMsg(content, isSender = true, time = null) {
+    const msgElement = document.createElement('c-msg');
+    msgElement.content = content;
+    msgElement.isSender = isSender;
+    if (time) msgElement.time = new Date(time);
+    return msgElement;
+  }
+
+  addPrevMsgs(msgsDiv, otherUserUUID) {
+    let offset = 0;
+    const limit = 10;
+    let loading = false;
+    let allLoaded = false;
+
+    // loading spinner
+    const loadingSpinner = this.createLoadingSpinner();
+    msgsDiv.parentElement.insertBefore(loadingSpinner, msgsDiv);
+    loadingSpinner.style.display = 'none'; // caché par défaut
+
+    const fetchMessagesAndRender = async () => {
+      if (loading || allLoaded) return;
+      loading = true;
+      loadingSpinner.style.display = 'flex';
+
+      try {
+        const messages = await fetchMessages(state.user.uuid, otherUserUUID, offset, limit);
+
+        if (messages.length < limit) allLoaded = true;
+
+        const scrollBottomBefore = msgsDiv.scrollHeight - msgsDiv.scrollTop;
+
+        for (let msg of messages) {
+          const isSender = msg.from === state.user.uuid;
+          const msgElement = this.createMsg(msg.content, isSender, msg.time);
+          msgsDiv.insertBefore(msgElement, msgsDiv.firstChild);
+        }
+
+        offset += messages.length;
+        msgsDiv.scrollTop = msgsDiv.scrollHeight - scrollBottomBefore;
+      } catch (err) {
+        console.error('Erreur lors du fetch des messages :', err);
+      } finally {
+        loading = false;
+        setTimeout(() => {
+          loadingSpinner.style.display = 'none';
+        }, 500);
+      }
+    };
+
+    let lastTime = 0;
+    const onScroll = () => {
+      const now = Date.now();
+      if (now - lastTime >= 500 && msgsDiv.scrollTop < 50) {
+        lastTime = now;
+        fetchMessagesAndRender();
+      }
+    };
+
+    msgsDiv.addEventListener('scroll', onScroll);
+    fetchMessagesAndRender();
+  }
+
+  createLoadingSpinner() {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `
+    flex items-center justify-center bg-indigo-500 text-white text-sm font-medium 
+    py-1 px-3 rounded shadow disabled:opacity-50 mt-2 self-center fixed
+  `;
+    button.disabled = true;
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList = 'mr-2 size-4 animate-spin fill-white';
+    svg.setAttribute('viewBox', '0 0 24 24');
+
+    svg.innerHTML = `
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+  `;
+
+    const span = document.createElement('span');
+    span.textContent = 'Chargement…';
+
+    button.appendChild(svg);
+    button.appendChild(span);
+    return button;
   }
 }
