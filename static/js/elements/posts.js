@@ -10,6 +10,7 @@ export class PostsElement extends HTMLElement {
   }
 
   render() {
+    this.className = 'flex flex-col sm:h-0 flex-1';
     // Check if Posts are ok
     if (!Array.isArray(state.posts)) {
       alert('no post');
@@ -19,7 +20,7 @@ export class PostsElement extends HTMLElement {
     this.innerHTML = '';
     // create section
     const section = document.createElement('section');
-    section.classList = 'max-w-5xl p-4 m-auto place-items-center grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5';
+    section.classList = 'max-w-5xl p-4 m-auto place-items-center overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5';
     // add categories elements
     for (let post of state.posts) {
       const box = document.createElement('c-post');

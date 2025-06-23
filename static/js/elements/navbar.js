@@ -15,7 +15,7 @@ export class NavBarElement extends HTMLElement {
 
   render() {
     this.className = `
-      fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000]
+      max-sm:fixed max-sm:left-1/2 max-sm:-translate-x-1/2 max-sm:bottom-5 mb-5 z-[1000] self-center
       flex items-center justify-around
       w-auto max-w-5xl h-16 p-3 space-x-4
       rounded-lg border border-white
@@ -53,6 +53,8 @@ export class NavBarElement extends HTMLElement {
   }
 
   toggleChat() {
+    // remove notif
+    this.notifDiv?.classList.add('hidden');
     // checks if a modal is already open
     const existingModal = document.querySelector('c-modal');
     if (existingModal) {
@@ -64,8 +66,6 @@ export class NavBarElement extends HTMLElement {
     const chat = document.createElement('c-chat');
     modal.appendChild(chat);
     document.querySelector('main').appendChild(modal);
-    // remove notif
-    this.notifDiv.classList.add('hidden');
   }
 
   toggleCreatePost() {

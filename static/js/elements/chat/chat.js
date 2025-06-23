@@ -44,7 +44,7 @@ export class ChatElement extends HTMLElement {
     const selectedUUID = this.selectedUserLi?.dataset.uuid;
     this.usersList.innerHTML = '';
 
-    if (state.connectedUsers.length === 0) {
+    if (!state.connectedUsers || state.connectedUsers.length === 0) {
       this.usersList.innerHTML = '<p class="text-red-500">Aucun utilisateur connecté !</p>';
       return;
     }
