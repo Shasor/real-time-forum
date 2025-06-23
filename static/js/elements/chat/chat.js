@@ -81,7 +81,7 @@ export class ChatElement extends HTMLElement {
         this.appendChild(this.convDiv);
 
         const msgsDiv = document.createElement('div');
-        msgsDiv.className = `flex flex-col flex-1 p-4 overflow-y-auto space-y-2`;
+        msgsDiv.className = `flex flex-col-reverse flex-1 p-4 overflow-y-auto space-y-2`;
         this.convDiv.appendChild(msgsDiv);
 
         const input = document.createElement('input');
@@ -95,7 +95,7 @@ export class ChatElement extends HTMLElement {
         state.user.messageHandlers['msg'] = (msg) => {
           if (msg.type !== 'msg' || msg.from !== this.selectedUserLi.dataset.uuid) return;
 
-          msgsDiv.appendChild(this.createMsg(msg.content, false));
+          msgsDiv.prepend(this.createMsg(msg.content, false));
           msgsDiv.scrollTop = msgsDiv.scrollHeight;
         };
 
@@ -106,7 +106,7 @@ export class ChatElement extends HTMLElement {
             state.user.sendMessage(targetUUID, content);
             input.value = '';
 
-            msgsDiv.appendChild(this.createMsg(content));
+            msgsDiv.prepend(this.createMsg(content));
             msgsDiv.scrollTop = msgsDiv.scrollHeight;
             if (this.selectedUserLi !== this.selectedUserLi.parentElement.firstElementChild) this.renderUsersList();
           }
@@ -149,7 +149,7 @@ export class ChatElement extends HTMLElement {
         for (let msg of messages) {
           const isSender = msg.from === state.user.uuid;
           const msgElement = this.createMsg(msg.content, isSender, msg.time);
-          msgsDiv.insertBefore(msgElement, msgsDiv.firstChild);
+          msgsDiv.appendChild(msgElement, msgsDiv.firstChild);
         }
 
         offset += messages.length;
