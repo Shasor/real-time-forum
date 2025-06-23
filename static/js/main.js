@@ -21,6 +21,7 @@ export const state = {
   user: new User(localStorage.getItem('session_uuid')),
   posts: await getPosts(),
   connectedUsers: [],
+  category: 'none',
 };
 
 document.body.appendChild(document.createElement('c-app'));

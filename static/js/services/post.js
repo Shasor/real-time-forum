@@ -36,7 +36,7 @@ export async function createComment(data) {
   }
 }
 
-export async function getPosts(category = 'none', offset = 0, limit = 10) {
+export async function getPosts(category = 'none', offset = 0, limit = 12) {
   try {
     const res = await fetch(`/api/posts?category=${category}&offset=${offset}&limit=${limit}`);
     if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
