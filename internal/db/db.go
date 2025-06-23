@@ -50,7 +50,7 @@ func GetDB() *sql.DB {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user1 TEXT NOT NULL,
 			user2 TEXT NOT NULL,
-			last_message TEXT NOT NULL,
+			last_message INTEGER NOT NULL,
 			FOREIGN KEY(user1) REFERENCES users(uuid),
 			FOREIGN KEY(user2) REFERENCES users(uuid),
 			FOREIGN KEY(last_message) REFERENCES messages(uuid)

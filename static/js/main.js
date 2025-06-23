@@ -3,6 +3,7 @@ import { CategoriesElement } from './elements/categories.js';
 import { CategoryButton } from './elements/category.js';
 import { ChatElement } from './elements/chat/chat.js';
 import { MsgElement } from './elements/chat/msg.js';
+import { CommentsElement } from './elements/comments.js';
 import { CreatePostElement } from './elements/create-post.js';
 import { HeaderElement } from './elements/header.js';
 import { ModalElement } from './elements/modal.js';
@@ -10,7 +11,6 @@ import { NavBarButtonElement } from './elements/navbar-button.js';
 import { NavBarElement } from './elements/navbar.js';
 import { PostElement } from './elements/post.js';
 import { PostsElement } from './elements/posts.js';
-import { CommentsElement } from './elements/comments.js';
 import { SignInElement } from './elements/signin.js';
 import { SignUpElement } from './elements/signup.js';
 import { SpacingElement } from './elements/spacing.js';
@@ -20,6 +20,7 @@ import { getPosts } from './services/post.js';
 export const state = {
   user: new User(localStorage.getItem('session_uuid')),
   posts: await getPosts(),
+  connectedUsers: [],
 };
 
 document.body.appendChild(document.createElement('c-app'));

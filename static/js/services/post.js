@@ -37,7 +37,7 @@ export async function createComment(data) {
 }
 
 export async function getPosts(category) {
-  const res = await fetch(!category ? '/api/posts' : `/api/posts?category=${category}`, { method: 'POST' });
+  const res = await fetch(!category ? '/api/posts' : `/api/posts?category=${category}`);
   const result = await res.json();
   if (result.code !== 200) {
     // to do

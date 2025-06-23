@@ -12,8 +12,9 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		origin := r.Header.Get("Origin")
 		allowed := map[string]bool{
-			"http://localhost:8080":   true,
-			"http://172.20.10.2:8080": true,
+			"http://localhost:8080":    true,
+			"http://172.20.10.2:8080":  true,
+			"http://192.168.1.42:8080": true,
 		}
 		return allowed[origin]
 	},
@@ -45,6 +46,7 @@ func WebSocketHandler(hub *Hub) http.HandlerFunc {
 			Conn:     conn,
 			Send:     make(chan Message),
 			UserUUID: user.UUID,
+			Nickname: user.Nickname,
 		}
 
 		hub.Register <- client

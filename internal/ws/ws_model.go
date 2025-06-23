@@ -1,13 +1,16 @@
 package ws
 
 import (
+	"encoding/json"
 	"net/http"
 	"real-time-forum/internal/db"
+	"real-time-forum/internal/models"
 
 	"github.com/gorilla/websocket"
 )
 
 type Message struct {
+	Type    string `json:"type"`
 	From    string `json:"from"`
 	To      string `json:"to"`
 	Content string `json:"content"`
@@ -18,6 +21,7 @@ type Client struct {
 	Conn     *websocket.Conn
 	Send     chan Message
 	UserUUID string
+	Nickname string
 }
 
 func (c *Client) Read(hub *Hub) {
@@ -33,15 +37,19 @@ func (c *Client) Read(hub *Hub) {
 			break
 		}
 
-		// Set l'expéditeur du message
+		msg.Type = "msg"
 		msg.From = c.UserUUID
 
-		// 1. Insertion en base
-		code, err := db.CreateMsg(msg.From, msg.To, msg.Content, msg.Time)
-		if err != nil || code != http.StatusOK {
-			// Log ou gérer l'erreur, ne pas broadcast si insertion fail
+		err = db.HandleConversation(msg.From, msg.To, msg.Time)
+		if err != nil {
 			continue
 		}
+
+		code, err := db.CreateMsg(msg.From, msg.To, msg.Content, msg.Time)
+		if err != nil || code != http.StatusOK {
+			continue
+		}
+
 		hub.Broadcast <- msg
 	}
 }
@@ -54,7 +62,6 @@ func (c *Client) Write(hub *Hub) {
 	for {
 		msg, ok := <-c.Send
 		if !ok {
-			// Si le canal est fermé, on ferme la connexion WebSocket
 			return
 		}
 
@@ -63,6 +70,39 @@ func (c *Client) Write(hub *Hub) {
 			return
 		}
 	}
+}
+
+func (h *Hub) sendUserListTo(c *Client) {
+	others := make([]models.User, 0)
+	for _, client := range h.Clients {
+		if client.UserUUID == c.UserUUID {
+			continue
+		}
+		others = append(others, models.User{
+			UUID:     client.UserUUID,
+			Nickname: client.Nickname,
+		})
+	}
+
+	sorted, err := db.SortUsersByLastMessage(c.UserUUID, others)
+	if err != nil {
+		return
+	}
+
+	data, err := json.Marshal(sorted)
+	if err != nil {
+		return
+	}
+
+	msg := Message{
+		Type:    "user_list",
+		From:    "system",
+		To:      c.UserUUID,
+		Content: string(data),
+		Time:    0,
+	}
+
+	c.Send <- msg
 }
 
 type Hub struct {
@@ -77,12 +117,23 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.Register:
 			h.Clients[client.UserUUID] = client
+			for _, c := range h.Clients {
+				h.sendUserListTo(c)
+			}
 		case client := <-h.Unregister:
 			delete(h.Clients, client.UserUUID)
 			close(client.Send)
+			for _, c := range h.Clients {
+				if c != client {
+					h.sendUserListTo(c)
+				}
+			}
 		case msg := <-h.Broadcast:
 			if dest, ok := h.Clients[msg.To]; ok {
 				dest.Send <- msg
+			}
+			for _, c := range h.Clients {
+				h.sendUserListTo(c)
 			}
 		}
 	}
