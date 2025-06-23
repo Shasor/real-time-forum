@@ -36,19 +36,20 @@ export async function createComment(data) {
   }
 }
 
-export async function getPosts(category) {
-  const res = await fetch(!category ? '/api/posts' : `/api/posts?category=${category}`);
-  const result = await res.json();
-  if (result.code !== 200) {
-    // to do
-    // display a error msg
-    return;
+export async function getPosts(category = 'none', offset = 0, limit = 12) {
+  try {
+    const res = await fetch(`/api/posts?category=${category}&offset=${offset}&limit=${limit}`);
+    if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
+    const result = await res.json();
+    return result?.data || [];
+  } catch (err) {
+    console.error('Erreur lors du fetch des messages :', err);
+    return [];
   }
-  return result.data.posts;
 }
 
 export async function getComments(postUUID) {
-  const res = await fetch(`/api/comments?post=${postUUID}`, { method: 'POST' });
+  const res = await fetch(`/api/comments?post=${postUUID}`);
   const result = await res.json();
   if (result.code !== 200) {
     return;

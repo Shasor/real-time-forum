@@ -3,7 +3,7 @@ package db
 import (
 	"net/http"
 	"real-time-forum/internal/models"
-	"sort"
+	"slices"
 
 	"github.com/google/uuid"
 )
@@ -42,38 +42,31 @@ func SortUsersByLastMessage(userUUID string, others []models.User) ([]models.Use
 	db := GetDB()
 	defer db.Close()
 
-	type convTime struct {
-		u    models.User
-		time int64
+	query := `
+			SELECT u.uuid, u.nickname FROM conversations c
+			JOIN users u ON (u.uuid = c.user1 OR u.uuid = c.user2)
+			WHERE (user1 = ? OR user2 = ?)
+			ORDER BY last_message DESC
+		`
+
+	rows, err := db.Query(query, userUUID, userUUID)
+	if err != nil {
+		return nil, err
 	}
+	defer rows.Close()
 
-	var convs []convTime
-	for _, u := range others {
-		var last int64
-		row := db.QueryRow(`
-			SELECT last_message FROM conversations
-			WHERE (user1 = ? AND user2 = ?)
-			   OR (user1 = ? AND user2 = ?)
-		`, userUUID, u.UUID, u.UUID, userUUID)
-
-		err := row.Scan(&last)
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.UUID, &user.Nickname)
 		if err != nil {
-			last = 0
+			return nil, err
 		}
-
-		convs = append(convs, convTime{u: u, time: last})
+		if slices.Contains(others, user) {
+			users = append(users, user)
+		}
 	}
-
-	sort.Slice(convs, func(i, j int) bool {
-		return convs[i].time > convs[j].time
-	})
-
-	sorted := make([]models.User, len(convs))
-	for i, c := range convs {
-		sorted[i] = c.u
-	}
-
-	return sorted, nil
+	return users, nil
 }
 
 // Gère la création ou la mise à jour d'une conversation

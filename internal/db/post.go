@@ -43,29 +43,31 @@ func CreatePost(userUUID, parentUUID, content, category string) (int, error) {
 	return http.StatusOK, nil
 }
 
-func GetPosts(category string) ([]models.Post, error) {
+func GetPosts(category string, offset, limit int) ([]models.Post, error) {
 	db := GetDB()
 	defer db.Close()
 
 	query := `
-        SELECT p.*, u.nickname, u.age, u.gender, u.firstName, u.lastName, u.email
-       FROM posts p
-       JOIN users u ON p.user = u.uuid
-       WHERE p.parent IS NULL`
+    	SELECT p.*, u.nickname, u.age, u.gender, u.firstName, u.lastName, u.email
+       	FROM posts p
+       	JOIN users u ON p.user = u.uuid
+       	WHERE p.parent IS NULL`
 
 	var rows *sql.Rows
 	var err error
 
-	if category != "" {
+	if category != "none" {
 		query += ` AND p.category = ?`
 	}
 
-	query += ` ORDER BY p.created_at DESC;`
+	query += `
+		ORDER BY p.created_at DESC
+		LIMIT ? OFFSET ?;`
 
-	if category != "" {
-		rows, err = db.Query(query, category)
+	if category != "none" {
+		rows, err = db.Query(query, category, limit, offset)
 	} else {
-		rows, err = db.Query(query)
+		rows, err = db.Query(query, limit, offset)
 	}
 
 	if err != nil {

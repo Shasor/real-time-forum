@@ -37,8 +37,7 @@ func (c *Client) Read(hub *Hub) {
 			break
 		}
 
-		msg.Type = "msg"
-		msg.From = c.UserUUID
+		msg.Type, msg.From = "msg", c.UserUUID
 
 		err = db.HandleConversation(msg.From, msg.To, msg.Time)
 		if err != nil {
@@ -50,7 +49,14 @@ func (c *Client) Read(hub *Hub) {
 			continue
 		}
 
+		notif := Message{
+			Type: "notif",
+			From: "system",
+			To:   msg.To,
+		}
+
 		hub.Broadcast <- msg
+		hub.Broadcast <- notif
 	}
 }
 

@@ -12,6 +12,7 @@ export class AppElement extends HTMLElement {
   render() {
     // create main
     const main = document.createElement('main');
+    main.className = 'sm:flex sm:flex-col sm:h-full';
     this.appendChild(main);
 
     if (!state.user.isConnected) {
@@ -35,6 +36,9 @@ export class AppElement extends HTMLElement {
     // posts
     const posts = document.createElement('c-posts');
     main.appendChild(posts);
+    // spacing
+    const spacing3 = document.createElement('c-spacing');
+    main.appendChild(spacing3);
     // navbar
     const navbar = document.createElement('c-navbar');
     main.appendChild(navbar);

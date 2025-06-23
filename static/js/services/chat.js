@@ -11,7 +11,7 @@ export async function fetchMessages(from, to, offset = 0, limit = 10) {
     const res = await fetch(`/api/chat?from=${from}&to=${to}&offset=${offset}&limit=${limit}`);
     if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
     const result = await res.json();
-    return result?.messages || [];
+    return result?.data || [];
   } catch (err) {
     console.error('Erreur lors du fetch des messages :', err);
     return [];

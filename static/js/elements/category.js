@@ -11,6 +11,7 @@ export class CategoryButton extends HTMLElement {
     this.render();
     this.addEventListener('click', async () => {
       if (!categories.includes(this.textContent)) return;
+      state.category = this.textContent;
       state.posts = await getPosts(this.textContent);
       const posts = document.querySelector('c-posts');
       posts.render();

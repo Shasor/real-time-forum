@@ -17,6 +17,7 @@ export class CreatePostElement extends HTMLElement {
         user: state.user,
       };
       createPost(data);
+      window.location.href = '/';
     });
   }
 
