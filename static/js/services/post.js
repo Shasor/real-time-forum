@@ -48,7 +48,7 @@ export async function getPosts(category) {
 }
 
 export async function getComments(postUUID) {
-  const res = await fetch(`/api/comments?post=${postUUID}`, { method: 'POST' });
+  const res = await fetch(`/api/comments?post=${postUUID}`);
   const result = await res.json();
   if (result.code !== 200) {
     return;
