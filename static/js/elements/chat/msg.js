@@ -11,7 +11,7 @@ export class MsgElement extends HTMLElement {
   }
 
   render() {
-    if (this.isSender) this.className = 'self-end';
+    if (this.isSender) this.classList.add('self-end');
     const msgDiv = document.createElement('div');
     msgDiv.className = `flex items-center gap-2`;
     this.appendChild(msgDiv);

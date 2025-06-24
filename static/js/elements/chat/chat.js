@@ -12,7 +12,10 @@ export class ChatElement extends HTMLElement {
   connectedCallback() {
     state.user.socket.addEventListener('message', (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.type === 'user_list') this.renderUsersList();
+      if (msg.type === 'user_list') {
+        if (state.connectedUsers?.every((user) => user.uuid !== this.selectedUserLi?.dataset.uuid) || !state.connectedUsers) this.convDiv?.remove();
+        this.renderUsersList();
+      }
     });
     this.render();
   }
@@ -81,7 +84,7 @@ export class ChatElement extends HTMLElement {
         this.appendChild(this.convDiv);
 
         const msgsDiv = document.createElement('div');
-        msgsDiv.className = `flex flex-col-reverse flex-1 p-4 overflow-y-auto space-y-2`;
+        msgsDiv.className = `flex flex-col-reverse flex-1 p-4 overflow-y-auto gap-2`;
         this.convDiv.appendChild(msgsDiv);
 
         const input = document.createElement('input');

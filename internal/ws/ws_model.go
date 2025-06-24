@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"real-time-forum/internal/db"
 	"real-time-forum/internal/models"
+	"sort"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -88,6 +90,9 @@ func (h *Hub) sendUserListTo(c *Client) {
 			UUID:     client.UserUUID,
 			Nickname: client.Nickname,
 		})
+		sort.Slice(others, func(i, j int) bool {
+			return strings.ToLower(others[i].Nickname) < strings.ToLower(others[j].Nickname)
+		})
 	}
 
 	sorted, err := db.SortUsersByLastMessage(c.UserUUID, others)
@@ -130,16 +135,16 @@ func (h *Hub) Run() {
 			delete(h.Clients, client.UserUUID)
 			close(client.Send)
 			for _, c := range h.Clients {
-				if c != client {
-					h.sendUserListTo(c)
-				}
+				h.sendUserListTo(c)
 			}
 		case msg := <-h.Broadcast:
 			if dest, ok := h.Clients[msg.To]; ok {
 				dest.Send <- msg
 			}
 			for _, c := range h.Clients {
-				h.sendUserListTo(c)
+				if c.UserUUID == msg.From || c.UserUUID == msg.To {
+					h.sendUserListTo(c)
+				}
 			}
 		}
 	}

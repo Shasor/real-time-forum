@@ -32,7 +32,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := db.SelectUserByLogin(input.Login)
 	if user == nil || err != nil {
-		resp.Code = http.StatusNotFound
+		resp.Code = http.StatusUnauthorized
 		resp.Msg = err.Error()
 		utils.SendResponse(w, resp)
 		return
