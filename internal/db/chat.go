@@ -66,6 +66,15 @@ func SortUsersByLastMessage(userUUID string, others []models.User) ([]models.Use
 			users = append(users, user)
 		}
 	}
+
+	if len(users) != len(others) {
+		for _, o := range others {
+			if !slices.Contains(users, o) {
+				users = append(users, o)
+			}
+		}
+	}
+
 	return users, nil
 }
 

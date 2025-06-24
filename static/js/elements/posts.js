@@ -13,10 +13,10 @@ export class PostsElement extends HTMLElement {
   render() {
     this.className = 'flex flex-col sm:h-0 flex-1 items-center';
     // Check if Posts are ok
-    if (state.posts.length < 1) {
-      alert('no post');
-      return;
-    }
+    // if (state.posts.length < 1) {
+    //   alert('no post');
+    //   return;
+    // }
     // Reset le contenu à chaque appel de render pour ne pas ajouter plusieurs fois les mêmes éléments
     this.innerHTML = '';
     // create section

@@ -70,8 +70,7 @@ export class SignInElement extends HTMLElement {
 
       const result = await res.json();
       if (result.code !== 200) {
-        // to do
-        // display a error msg
+        alert(result.msg);
         return;
       }
 
